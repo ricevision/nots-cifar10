@@ -70,10 +70,10 @@ else
     echo "Status:    Unknown (job may have been cancelled)"
 fi
 
-# Show output
-OUTPUT=$(echo "$INFO" | sed -n '/---OUTPUT---/,/---ERRORS---/{ /---OUTPUT---/d; /---ERRORS---/d; p }')
+# Show output (extract lines between ---OUTPUT--- and ---ERRORS---)
+OUTPUT=$(echo "$INFO" | awk '/---ERRORS---/{found=0} found{print} /---OUTPUT---/{found=1}')
 if [ -z "$OUTPUT" ]; then
-    OUTPUT=$(echo "$INFO" | sed -n '/---OUTPUT---/,${ /---OUTPUT---/d; p }')
+    OUTPUT=$(echo "$INFO" | awk 'found{print} /---OUTPUT---/{found=1}')
 fi
 if [ -n "$OUTPUT" ]; then
     echo ""
@@ -81,8 +81,8 @@ if [ -n "$OUTPUT" ]; then
     echo "$OUTPUT"
 fi
 
-# Show errors
-ERRORS=$(echo "$INFO" | sed -n '/---ERRORS---/,${ /---ERRORS---/d; p }')
+# Show errors (extract lines after ---ERRORS---)
+ERRORS=$(echo "$INFO" | awk 'found{print} /---ERRORS---/{found=1}')
 if [ -n "$ERRORS" ]; then
     echo ""
     echo "Errors:"
